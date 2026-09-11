@@ -1,1 +1,23 @@
+# Core data analysis
+pandas>=2.2
+numpy>=2.0
 
+# Visualization
+matplotlib>=3.9
+
+# Statistical analysis
+scipy>=1.14
+
+# Process mining
+pm4py>=2.7
+
+# SQL connectivity
+SQLAlchemy>=2.0
+psycopg2-binary>=2.9
+
+# Excel support
+openpyxl>=3.1
+
+# Notebook environment
+jupyterlab>=4.2
+ipykernel>=6.29
