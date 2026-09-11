@@ -1,11 +1,10 @@
-
 # Purchase-to-Pay Process Mining & Exception Intelligence
 
-## Project Overview
+## Overview
 
-This project analyzes a large Purchase-to-Pay (P2P) event log to understand how procurement and invoice-processing transactions actually move through the business process.
+This project analyzes a large-scale Purchase-to-Pay (P2P) event log to understand how procurement and invoice-processing transactions actually move through the business process.
 
-The goal is to identify:
+The solution combines **Data Analytics + Business Analysis + Process Mining** to identify:
 
 * process variants,
 * long-running transactions,
@@ -15,58 +14,62 @@ The goal is to identify:
 * repeated activities,
 * resource handoffs,
 * exception concentrations,
-* and transactions that should be prioritized for operational investigation.
+* and transactions requiring operational investigation.
 
-The project combines **Data Analyst and Business Analyst responsibilities** using:
+### Technology Stack
 
-**SQL | Python | Excel | Power BI | Business Analysis | Process Mining**
+**Python | SQL | Excel | Power BI | Business Analysis | Process Mining**
 
 ---
 
-## Business Problem
+# Business Problem
 
 A multinational organization processes a high volume of Purchase-to-Pay transactions across vendors, purchasing processes, spend categories, and operational resources.
 
-Although many transactions follow common purchasing and invoice-processing paths, others contain purchase-order modifications, approval changes, goods-receipt reversals, invoice reversals, payment-block handling, repeated activities, and unusual process sequences.
+Although many transactions follow common purchasing and invoice-processing paths, others contain:
 
-Management lacks a consolidated analytical view of:
+* purchase-order modifications,
+* approval changes,
+* goods-receipt reversals,
+* invoice reversals,
+* payment-block handling,
+* repeated processing activities,
+* and non-standard process sequences.
 
-* how transactions actually move through the P2P process,
-* where operational rework occurs,
-* where processing delays are concentrated,
-* which process variants are unusually complex,
-* which vendors or purchasing segments show high exception rates,
-* and which individual transactions should be investigated first.
+Management lacks a consolidated analytical view of how transactions actually move through the P2P lifecycle, where operational rework and processing delays occur, and which cases or process segments contribute disproportionately to process complexity.
 
-The project therefore develops a **P2P Process Intelligence and Exception Monitoring solution** that reconstructs actual transaction flows, measures process performance, detects exception patterns, and supports evidence-based process-improvement decisions.
+This limits the ability of Procurement, Accounts Payable, Finance, and P2P process owners to systematically identify recurring operational issues and prioritize improvement opportunities.
+
+The project therefore develops a **P2P Process Intelligence & Exception Monitoring solution** to reconstruct actual transaction flows, measure process performance, identify exception patterns, and support evidence-based process-improvement decisions.
 
 ---
 
-## Project Objective
+# Project Objective
 
-The primary objective is to develop a data-driven P2P analytical solution that enables Procurement, Accounts Payable, Finance, and process owners to:
+The objective is to develop a data-driven P2P analytical solution that enables business stakeholders to:
 
-* understand actual P2P execution,
+* reconstruct actual P2P process execution,
 * identify common and unusual process variants,
-* quantify rework and reversals,
-* measure processing cycle times,
-* detect long-running cases,
-* investigate payment-block handling,
-* compare exception rates across business dimensions,
-* identify high-complexity transactions,
-* and prioritize cases and process areas requiring further investigation.
+* quantify purchase-order rework,
+* identify invoice and goods-receipt reversals,
+* measure transaction cycle times,
+* detect long-running transactions,
+* analyze payment-block handling,
+* evaluate resource handoffs and process complexity,
+* compare exception patterns across vendors and purchasing segments,
+* and prioritize cases requiring further investigation.
 
 ---
 
-## Dataset
+# Dataset
 
-The project uses the **BPI Challenge 2019 Purchase-to-Pay event log** converted from XES format into CSV.
+The project uses the **BPI Challenge 2019 Purchase-to-Pay event log**, converted from XES format into CSV for analysis.
 
-### Dataset Baseline
+## Dataset Profile
 
 | Metric               |     Value |
 | -------------------- | --------: |
-| Event Rows           | 1,595,923 |
+| Event Records        | 1,595,923 |
 | Columns              |        21 |
 | Unique P2P Cases     |   251,734 |
 | Purchasing Documents |    76,349 |
@@ -74,48 +77,73 @@ The project uses the **BPI Challenge 2019 Purchase-to-Pay event log** converted 
 | Activities           |        42 |
 | Companies            |         4 |
 
-The dataset is an **event log**, meaning multiple rows can belong to the same P2P case.
+The dataset is structured as an **event log**.
+
+A single P2P case may contain multiple activities.
 
 Therefore:
 
-> Event count ≠ transaction count.
+```text id="qrm86g"
+Event Count ≠ Transaction Count
+```
+
+The analysis maintains both:
+
+```text id="7xm0xp"
+Event-Level Grain
+        +
+Case-Level Grain
+```
+
+to avoid incorrect aggregation.
 
 ---
 
-## Important Dataset Fields
+# Core Dataset Fields
 
-| Field                        | Purpose                                          |
-| ---------------------------- | ------------------------------------------------ |
-| `case:concept:name`          | Unique process case identifier                   |
-| `concept:name`               | Activity/event name                              |
-| `time:timestamp`             | Event sequencing and duration analysis           |
-| `org:resource`               | Resource and handoff analysis                    |
-| `case:Vendor`                | Vendor-level comparison                          |
-| `case:Company`               | Company-level segmentation                       |
-| `case:Spend area text`       | Spend segmentation                               |
-| `case:Sub spend area text`   | Detailed spend analysis                          |
-| `case:Item Category`         | P2P process / matching category                  |
-| `case:Document Type`         | Document-type analysis                           |
-| `case:GR-Based Inv. Verif.`  | GR-based invoice verification                    |
-| `case:Goods Receipt`         | Goods-receipt characteristic                     |
-| `Cumulative net worth (EUR)` | Transaction-value analysis subject to validation |
+| Field                            | Analytical Purpose                               |
+| -------------------------------- | ------------------------------------------------ |
+| `case:concept:name`              | Unique P2P case identifier                       |
+| `concept:name`                   | Activity / event name                            |
+| `time:timestamp`                 | Event sequence and cycle-time analysis           |
+| `org:resource`                   | Resource participation and handoffs              |
+| `case:Vendor`                    | Vendor-level analysis                            |
+| `case:Company`                   | Company segmentation                             |
+| `case:Spend area text`           | Spend-area analysis                              |
+| `case:Sub spend area text`       | Detailed spend segmentation                      |
+| `case:Spend classification text` | Procurement classification                       |
+| `case:Purchasing Document`       | Purchasing-document reference                    |
+| `case:Purch. Doc. Category name` | Purchasing-document category                     |
+| `case:Document Type`             | Document-type segmentation                       |
+| `case:Item Type`                 | Item-level segmentation                          |
+| `case:Item Category`             | P2P process / matching category                  |
+| `case:GR-Based Inv. Verif.`      | GR-based invoice-verification analysis           |
+| `case:Goods Receipt`             | Goods-receipt characteristic                     |
+| `Cumulative net worth (EUR)`     | Transaction-value analysis subject to validation |
 
 ---
 
-## P2P Activities Available
+# P2P Process Coverage
 
-The event log contains activities from multiple parts of the P2P lifecycle.
+The event log contains activities across several stages of the P2P lifecycle.
 
-### Procurement
+## Procurement
 
-* Create Purchase Requisition Item
-* Release Purchase Requisition
-* Create Purchase Order Item
-* Release Purchase Order
-* Receive Order Confirmation
-* Update Order Confirmation
+```text id="coap5s"
+Create Purchase Requisition Item
+        ↓
+Release Purchase Requisition
+        ↓
+Create Purchase Order Item
+        ↓
+Release Purchase Order
+        ↓
+Receive Order Confirmation
+```
 
-### Purchase Order Changes
+## Purchase-Order Changes
+
+Examples include:
 
 * Change Quantity
 * Change Price
@@ -128,13 +156,13 @@ The event log contains activities from multiple parts of the P2P lifecycle.
 * Block Purchase Order Item
 * Reactivate Purchase Order Item
 
-### Goods / Service Receipt
+## Receipt / Service Processing
 
 * Record Goods Receipt
 * Cancel Goods Receipt
 * Record Service Entry Sheet
 
-### Invoice Processing
+## Invoice Processing
 
 * Vendor creates invoice
 * Record Invoice Receipt
@@ -143,53 +171,72 @@ The event log contains activities from multiple parts of the P2P lifecycle.
 * Record Subsequent Invoice
 * Cancel Subsequent Invoice
 
-### Payment Handling
+## Payment / Completion
 
 * Set Payment Block
 * Remove Payment Block
 * Clear Invoice
 
-The dataset also contains several SRM/system-related activities.
+The dataset also contains several SRM/system-related activities that will be analyzed separately from standard business-process activities.
 
 ---
 
-## Key Business Questions
+# Business Questions
 
-The project is driven by business questions rather than dashboard visuals.
+The analysis is driven by business questions rather than dashboard visuals.
 
-1. What process variants occur in the P2P lifecycle?
-2. What percentage of cases follows the most common process variants?
-3. Which process variants have the longest processing times?
-4. How frequently are purchase orders modified?
-5. Which types of PO modifications occur most frequently?
-6. Are PO-change cases associated with longer cycle times?
-7. How frequently are invoice receipts reversed?
-8. How frequently are goods receipts reversed?
-9. Are reversal cases associated with longer processing times?
-10. How do different P2P matching processes compare?
-11. Which vendors have disproportionately high exception rates?
-12. Which spend areas show higher levels of operational rework?
-13. How frequently do activities repeat within a case?
-14. How many resources typically participate in a transaction?
-15. Are higher resource handoffs associated with longer processing times?
-16. Which cases have unusually long cycle times?
-17. Which rare process variants require investigation?
-18. Which high-value transactions also show high process complexity?
-19. Where are exception patterns concentrated?
-20. Which transactions should operations investigate first?
+## Process Performance
+
+1. What process variants exist in the P2P lifecycle?
+2. What proportion of transactions follows the most common process variants?
+3. Which process variants have the longest cycle times?
+4. Which activities appear most frequently in long-running transactions?
+
+## Purchase-Order Rework
+
+5. How frequently are purchase orders modified?
+6. Which types of purchase-order changes occur most frequently?
+7. Are PO-change cases associated with longer cycle times?
+8. Which vendors or spend areas have higher PO-change rates?
+
+## Invoice & Receipt Exceptions
+
+9. How frequently are invoice receipts reversed?
+10. How frequently are goods receipts reversed?
+11. Are reversal cases associated with longer processing times?
+12. Which vendors or purchasing categories show higher reversal rates?
+
+## Payment-Block Handling
+
+13. Which cases contain payment-block-related activities?
+14. How long does it take to clear invoices after payment-block removal?
+15. How do block-handling cases differ from standard invoice cases?
+
+## Process Complexity
+
+16. How frequently do activities repeat within a case?
+17. How many resources participate in an average case?
+18. Are higher resource handoffs associated with longer cycle times?
+19. Which rare process variants show high operational complexity?
+
+## Investigation Prioritization
+
+20. Which cases combine multiple exception signals and should be investigated first?
 
 ---
 
-## Analytical Approach
+# Analytical Framework
 
-The project follows the workflow:
+The project follows a structured business-to-analysis workflow:
 
-```text
+```text id="76423w"
 Business Problem
         ↓
-Business Requirements
+Stakeholder Requirements
         ↓
-Raw Event Data
+Business Questions
+        ↓
+Raw P2P Event Data
         ↓
 Data Understanding
         ↓
@@ -207,31 +254,20 @@ Cycle-Time Analysis
         ↓
 Root-Cause Exploration
         ↓
-Power BI Decision Support
+Decision-Support Dashboard
         ↓
 Business Recommendations
 ```
 
 ---
 
-## Event-Level vs Case-Level Analysis
+# Analytical Data Model
 
-This project maintains two separate analytical grains.
-
-### Event Level
-
-Used for:
-
-* process sequencing,
-* activity analysis,
-* repeated events,
-* resource transitions,
-* process mining,
-* event-based exception detection.
+The source dataset is event-level.
 
 Example:
 
-```text
+```text id="61qhpo"
 Case001 → Create Purchase Order Item
 Case001 → Record Goods Receipt
 Case001 → Vendor creates invoice
@@ -239,19 +275,19 @@ Case001 → Record Invoice Receipt
 Case001 → Clear Invoice
 ```
 
-### Case Level
+For management analysis, a separate **case-level analytical model** will be created.
 
-A case-level table will be created with one row per P2P case.
+Expected structure:
 
-Expected derived fields include:
-
-```text
+```text id="ouy0y7"
 case_id
 vendor
+company
+spend_area
 item_category
 case_start
 case_end
-cycle_time_days
+cycle_time
 event_count
 unique_activity_count
 unique_resource_count
@@ -268,66 +304,97 @@ rare_variant_flag
 investigation_priority
 ```
 
-The case-level table will become the main analytical model for SQL, Python, Excel, and Power BI.
+This case-level dataset will become the primary analytical model for:
+
+* SQL,
+* Python,
+* Excel,
+* and Power BI.
 
 ---
 
-## Preliminary Exception Framework
+# Exception Framework
 
-### Purchase Order Rework
+The project uses clearly defined exception categories.
+
+## Purchase-Order Modification
 
 Examples:
 
-* Change Quantity
-* Change Price
-* Change Approval for Purchase Order
-* Change Delivery Indicator
-* Change Storage Location
-* Change Currency
-* Change payment term
+```text id="tkvp89"
+Change Quantity
+Change Price
+Change Approval for Purchase Order
+Change Delivery Indicator
+Change Storage Location
+Change Currency
+Change payment term
+```
 
-### Invoice Reversal
+These events will be used to calculate:
 
-Primary event:
+* PO Change Count
+* PO Change Rate
+* cases with PO rework
 
-```text
+---
+
+## Invoice Reversal
+
+Primary indicator:
+
+```text id="287fdi"
 Cancel Invoice Receipt
 ```
 
-### Goods Receipt Reversal
+Used to identify invoice-processing correction/reversal cases.
 
-Primary event:
+---
 
-```text
+## Goods Receipt Reversal
+
+Primary indicator:
+
+```text id="f7g1ru"
 Cancel Goods Receipt
 ```
 
-### Payment Block Handling
+Used to identify receipt-processing correction cases.
 
-The dataset contains both:
+---
 
-```text
+## Payment-Block Handling
+
+The dataset contains:
+
+```text id="cpmza8"
 Set Payment Block
 Remove Payment Block
 ```
 
-These will be analyzed separately because their frequencies are highly asymmetric.
+These activities will be measured separately.
 
-A payment-block event will **not automatically be interpreted as financial loss or process failure**.
+The analysis will distinguish between:
 
-### Repeated Activities
-
-Repeated events within the same case will be measured as process-complexity indicators.
-
-Repeated activity does not automatically mean rework.
+* Set Payment Block cases
+* Remove Payment Block cases
+* Any Payment Block Handling cases
 
 ---
 
-## Preliminary KPI Framework
+## Repeated Activities
 
-Planned KPIs include:
+Activities occurring multiple times within the same case will be measured as a **process-complexity indicator**.
 
-* Total Cases
+Repeated activity is not automatically treated as explicit rework.
+
+---
+
+# Planned KPI Framework
+
+## Process KPIs
+
+* Total P2P Cases
 * Total Events
 * Median Cycle Time
 * P90 Cycle Time
@@ -335,181 +402,290 @@ Planned KPIs include:
 * Number of Process Variants
 * Top Variant Coverage
 * Rare Variant Rate
+
+## Exception KPIs
+
 * PO Change Rate
 * Invoice Reversal Rate
 * Goods Receipt Reversal Rate
-* Payment-Block Handling Case Rate
+* Payment-Block Handling Rate
 * Repeated-Activity Case Rate
-* Median Resource Handoffs
-* Invoice Clearing Rate
-* High-Priority Investigation Cases
 
-Final KPI definitions will be created only after data validation and case-level modeling.
+## Complexity KPIs
+
+* Average Events per Case
+* Median Resource Handoffs
+* Unique Activities per Case
+* High-Complexity Case Count
+
+## Investigation KPIs
+
+* High-Priority Cases
+* Exception Cases by Vendor
+* Exception Cases by Spend Area
+* Exception Rate by P2P Process Type
 
 ---
 
-## Business Analyst Deliverables
+# Business Analysis Deliverables
 
-The BA component includes:
+The Business Analyst component focuses on translating the business problem into measurable analytical requirements.
 
-* Business problem definition
-* Problem statement
-* Project scope
-* Stakeholder analysis
-* Business requirements
-* Requirement traceability
-* AS-IS process analysis
-* Pain-point identification
-* Business-rule definition
-* KPI requirements
-* TO-BE process recommendations
-* Acceptance criteria
-* Risks and limitations
+Current BA deliverables:
 
-Main artifacts:
-
-```text
+```text id="3mlyhh"
 ba/
 ├── P2P_Business_Case_BRD.pdf
 ├── stakeholder_register.xlsx
 └── requirements_traceability.xlsx
 ```
 
+These cover:
+
+* business problem,
+* problem statement,
+* project scope,
+* stakeholders,
+* business requirements,
+* business questions,
+* analytical requirements,
+* assumptions,
+* constraints,
+* success criteria,
+* and requirement traceability.
+
 ---
 
-## Data Analyst Deliverables
+# Data Analytics Deliverables
 
-The DA component includes:
+## SQL
 
-### SQL
+```text id="21iyjw"
+sql/
+├── 01_data_validation.sql
+├── 02_case_level_model.sql
+├── 03_exception_analysis.sql
+└── 04_business_analysis.sql
+```
 
-* data validation,
-* case-level model creation,
-* exception analysis,
-* business KPI analysis,
-* vendor/process comparison,
-* cycle-time investigation.
+SQL will be used for:
 
-### Python
+* source validation,
+* case-level transformation,
+* exception classification,
+* KPI calculation,
+* segmentation,
+* ranking,
+* cycle-time analysis,
+* and business investigations.
+
+---
+
+## Python
+
+```text id="y7or32"
+notebooks/
+├── 01_data_understanding.ipynb
+├── 02_process_analysis.ipynb
+└── 03_root_cause_analysis.ipynb
+```
+
+Python will support:
 
 * data profiling,
-* event-log validation,
-* process-variant analysis,
+* data-quality investigation,
+* activity analysis,
+* process variants,
 * cycle-time distributions,
 * rework analysis,
 * outlier investigation,
 * root-cause exploration,
-* case prioritization.
+* and investigation prioritization.
 
-### Excel
+---
 
-Used for:
+## Excel
 
-* operational exception review,
-* reconciliation,
+```text id="vcrtk5"
+excel/
+└── P2P_Exception_Analysis.xlsx
+```
+
+Excel will provide an operational review layer for:
+
+* exception reconciliation,
+* filtering,
 * Pivot Tables,
-* conditional investigation,
-* management review.
+* conditional formatting,
+* vendor/category review,
+* and management investigation.
 
-### Power BI
+---
+
+## Power BI
+
+```text id="so5d42"
+powerbi/
+├── P2P_Process_Intelligence.pbix
+└── screenshots/
+```
 
 Planned dashboard pages:
 
-1. Executive Overview
-2. Process Variants
-3. Exception & Root-Cause Analysis
-4. Case Investigation
+### 1. Executive Overview
+
+Overall process health and exception performance.
+
+### 2. Process Variants
+
+Actual P2P execution paths, frequency, and duration.
+
+### 3. Exception & Root-Cause Analysis
+
+PO changes, reversals, cycle time, handoffs, vendor and spend analysis.
+
+### 4. Case Investigation
+
+Transaction-level drill-through into exact event sequences and exception indicators.
 
 ---
 
-## Important Analytical Boundaries
+# Business Analysis + Data Analysis Integration
 
-This project will **not automatically claim**:
+The project intentionally combines both disciplines.
+
+```text id="h37uzc"
+BUSINESS ANALYST
+      │
+      ├── Business Problem
+      ├── Stakeholders
+      ├── Requirements
+      ├── Process Analysis
+      ├── Business Rules
+      └── Acceptance Criteria
+              │
+              ▼
+         DATA ANALYST
+              │
+              ├── Data Validation
+              ├── SQL
+              ├── Python
+              ├── KPI Analysis
+              ├── Root-Cause Analysis
+              └── Power BI
+                      │
+                      ▼
+              BUSINESS DECISION
+```
+
+Neither role is added artificially.
+
+The BA work defines **what needs to be solved and why**.
+
+The DA work determines **what the data shows and what actions the evidence supports**.
+
+---
+
+# Analytical Integrity
+
+The project maintains strict analytical boundaries.
+
+It does not automatically classify:
+
+```text id="udw34d"
+Exception = Fraud
+```
+
+or:
+
+```text id="jd4mho"
+Rare Variant = Non-Compliance
+```
+
+or:
+
+```text id="febrvv"
+Repeated Activity = Confirmed Rework
+```
+
+or:
+
+```text id="nzk3kh"
+High Exception Vendor = Poor Supplier
+```
+
+Instead, exceptions and unusual patterns are treated as **signals requiring investigation**.
+
+The project also avoids unsupported claims regarding:
 
 * fraud,
 * supplier credit risk,
-* supplier quality failure,
-* employee underperformance,
+* supplier quality,
+* employee performance,
 * financial loss,
-* working-capital savings,
+* cost savings,
 * ROI,
-* causation from correlation.
-
-An exception is treated as:
-
-> **a signal requiring investigation**
-
-rather than proof of failure.
-
-Similarly:
-
-```text
-Rare process variant
-≠
-Non-compliant process
-```
-
-and:
-
-```text
-Repeated activity
-≠
-Confirmed rework
-```
-
-unless supported by documented business rules.
+* and causation.
 
 ---
 
-## Data Quality Considerations
+# Data Quality Strategy
 
-Initial profiling identified areas requiring investigation before cleaning.
+The dataset contains several areas that require investigation before transformation.
 
-### Duplicate-Looking Rows
+## Duplicate-Looking Events
 
-The source contains a large number of identical-looking rows.
+Repeated rows cannot automatically be removed because multiple identical-looking events may represent legitimate P2P business activities.
 
-These cannot simply be removed because events such as goods receipt and service entry may legitimately repeat.
+Duplicate handling will therefore distinguish:
 
-Therefore:
-
-```python
-df.drop_duplicates()
+```text id="6sqs2p"
+True Duplicate Records
+        VS
+Legitimate Repeated Events
 ```
-
-will not be used without investigation.
-
-### Timestamp Anomalies
-
-Some events contain unusually old timestamps compared with the dominant dataset period.
-
-These will be investigated and flagged rather than silently deleted.
-
-### Resource Fields
-
-Initial validation found that:
-
-```text
-User
-and
-org:resource
-```
-
-appear to contain the same information.
-
-This will be formally validated before one field is removed from the analytical model.
-
-### Monetary Value
-
-`Cumulative net worth (EUR)` may vary within some cases.
-
-The field will therefore not be summed at raw event level until its business meaning and case-level behavior are validated.
 
 ---
 
-## Repository Structure
+## Timestamp Validation
 
-```text
+Unusually old timestamps exist relative to the dominant event period.
+
+These records will be:
+
+```text id="uv3ljw"
+Detected
+↓
+Investigated
+↓
+Flagged
+↓
+Handled using documented rules
+```
+
+rather than silently deleted.
+
+---
+
+## Resource Validation
+
+`User` and `org:resource` appear to contain equivalent resource information.
+
+The fields will be formally validated before one is removed from the analytical model.
+
+---
+
+## Monetary Value Validation
+
+`Cumulative net worth (EUR)` can vary within some cases.
+
+Therefore the project will first determine its correct business grain before using it for financial exposure analysis.
+
+---
+
+# Repository Structure
+
+```text id="he0fvg"
 p2p-process-intelligence/
 │
 ├── README.md
@@ -550,88 +726,47 @@ p2p-process-intelligence/
 
 ---
 
-## Project Roadmap
+# Project Roadmap
 
-### Phase 1 — Business Understanding
-
-* [x] Define business problem
-* [x] Define project objective
-* [x] Define scope
-* [x] Identify stakeholders
-* [x] Define core business questions
-* [x] Create business-case documentation
-
-### Phase 2 — Data Understanding
-
-* [ ] Profile all 21 columns
-* [ ] Validate event and case grain
-* [ ] Analyze missing values
-* [ ] Review 42 activities
-* [ ] Investigate duplicate-looking events
-* [ ] Investigate timestamp anomalies
-* [ ] Validate case-level attribute consistency
-
-### Phase 3 — Data Preparation
-
-* [ ] Build validated event table
-* [ ] Create case-level analytical table
-* [ ] Generate process variants
-* [ ] Create resource handoff metrics
-* [ ] Create exception flags
-
-### Phase 4 — Business Rules
-
-* [ ] Finalize exception taxonomy
-* [ ] Define long-cycle thresholds
-* [ ] Define rare-variant logic
-* [ ] Finalize KPI dictionary
-
-### Phase 5 — SQL
-
-* [ ] Data validation queries
-* [ ] Case-level model
-* [ ] Exception analysis
-* [ ] Business analysis
-
-### Phase 6 — Python
-
-* [ ] Data-understanding notebook
-* [ ] Process-analysis notebook
-* [ ] Root-cause notebook
-
-### Phase 7 — Excel
-
-* [ ] Operational exception workbook
-
-### Phase 8 — Power BI
-
-* [ ] Executive Overview
-* [ ] Process Variant Analysis
-* [ ] Exception / Root-Cause Analysis
-* [ ] Case Investigation
-
-### Phase 9 — Business Recommendations
-
-* [ ] Convert analytical findings into recommendations
-* [ ] Prioritize improvement opportunities
-* [ ] Define KPIs to monitor outcomes
----
-## Tools
-
-* **Python:** Pandas, NumPy, Matplotlib
-* **SQL:** PostgreSQL / MySQL / SQL Server compatible analytical concepts
-* **Excel:** Pivot Tables, XLOOKUP, SUMIFS, COUNTIFS, conditional formatting
-* **Power BI:** Data modeling, DAX, drill-through, KPI reporting
-* **Business Analysis:** BRD, stakeholder analysis, requirements traceability, AS-IS/TO-BE, business rules, acceptance criteria
+| Phase | Workstream                          
+| ----- | ----------------------------------- 
+| 1     | Business Understanding              
+| 2     | Data Understanding & Profiling      
+| 3     | Data Preparation & Case Model       
+| 4     | Exception Rules & KPI Framework     
+| 5     | SQL Analysis                        
+| 6     | Python Analysis                     
+| 7     | Excel Operational Analysis          
+| 8     | Power BI Development                
+| 9     | Insight-to-Action & Recommendations 
+| 10    | Portfolio & Interview Review        
 
 ---
 
-## Project Positioning
+---
 
-This project is designed as a combined:
+# Project Goal
 
-**Data Analyst + Business Analyst + Process Analytics portfolio project**
+The final solution should enable business stakeholders to move from:
 
-with emphasis on:
+```text id="fx2v2k"
+Raw P2P Event Data
+```
 
-> **business decision-making, process understanding, analytical integrity, and evidence-based recommendations rather than dashboard decoration.**
+to:
+
+```text id="e293xv"
+Process Visibility
+       ↓
+Exception Detection
+       ↓
+Root-Cause Investigation
+       ↓
+Case Prioritization
+       ↓
+Business Action
+       ↓
+Performance Monitoring
+```
+
+The emphasis of this project is **business decision-making, process understanding, analytical rigor, and evidence-based recommendations** rather than dashboard decoration.
