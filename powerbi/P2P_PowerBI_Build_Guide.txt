@@ -1,0 +1,174 @@
+P2P PROCESS INTELLIGENCE — POWER BI BUILD GUIDE
+
+FILES TO LOAD
+1. Cases table:
+   P2P_PowerBI_Cases.csv
+
+2. Events table:
+   Your original output.csv
+
+MODEL
+Cases[Case ID] 1 ---- * Events[case:concept:name]
+
+Use single-direction filtering from Cases to Events.
+
+Rename the Events fields in Power Query:
+case:concept:name -> Case ID
+concept:name -> Activity
+time:timestamp -> Event Timestamp
+org:resource -> Resource
+case:Vendor -> Vendor
+case:Company -> Company
+case:Spend area text -> Spend Area
+case:Sub spend area text -> Sub Spend Area
+case:Document Type -> Document Type
+case:Item Category -> Item Category
+
+------------------------------------------------------------
+PAGE 1 — EXECUTIVE OVERVIEW
+------------------------------------------------------------
+Business question:
+How healthy is the P2P process?
+
+KPI cards:
+- Analysis Cases
+- Median Cycle Days
+- P90 Cycle Days
+- High Priority Cases
+- PO Modification Rate
+- Invoice Reversal Rate
+- GR Reversal Rate
+- Payment Block Handling Rate
+
+Visuals:
+- Cases by Item Category — bar chart
+- Investigation Priority — column chart
+- Spend Area matrix:
+  Cases | Exception Rate | Median Cycle Days | High Priority Cases
+
+Global slicers:
+- Vendor
+- Item Category
+- Spend Area
+- Document Type
+
+------------------------------------------------------------
+PAGE 2 — PROCESS VARIANTS
+------------------------------------------------------------
+Business questions:
+Which process paths dominate?
+Which common variants take longer?
+
+Visuals:
+- Top 15 Variant IDs by Cases — horizontal bar
+- Variant Cases vs Median Cycle Days — scatter
+- Variant summary table:
+  Variant ID
+  Cases
+  Variant Case Share %
+  Median Cycle Days
+  Exception Rate
+
+Use a minimum-volume filter before interpreting slow variants.
+
+Do not place very long activity-sequence strings on the main page.
+
+------------------------------------------------------------
+PAGE 3 — EXCEPTIONS & ROOT CAUSE
+------------------------------------------------------------
+Business question:
+Where are delays and exception signals concentrated?
+
+Vendor matrix:
+Vendor
+Cases
+Exception Cases
+Exception Rate
+PO Modification Rate
+Invoice Reversal Rate
+GR Reversal Rate
+Payment Block Handling Rate
+Median Cycle Days
+High Priority Cases
+
+Important:
+Never rank vendors only by exception count.
+Use case volume and exception rate together.
+
+Other visuals:
+- Exception rates by Item Category
+- Median cycle time by Resource Handoff Band
+- High Priority Cases by Spend Area
+- Document Type comparison
+
+Interpret association, not causation.
+
+------------------------------------------------------------
+PAGE 4 — CASE INVESTIGATION
+------------------------------------------------------------
+Default filter:
+Investigation Priority = High
+
+Case table:
+Case ID
+Vendor
+Spend Area
+Document Type
+Item Category
+Cycle Time Days
+Event Count
+Resource Handoff Count
+PO Modification Flag
+Invoice Reversal Flag
+GR Reversal Flag
+Payment Block Handling Flag
+Repeated Activity Flag
+Long Cycle Flag
+High Handoff Flag
+Investigation Priority Score
+Investigation Priority
+
+Create drill-through on Case ID.
+
+Event timeline table:
+Event Timestamp
+Activity
+Resource
+
+Sort Event Timestamp ascending.
+
+Selected-case cards:
+- Selected Case Priority
+- Selected Case Score
+- Selected Case Cycle Days
+- Selected Case Event Count
+- Selected Case Handoffs
+
+------------------------------------------------------------
+VALIDATION TARGETS
+------------------------------------------------------------
+Source Cases: 251,734
+Analysis Cases: 251,656
+Median Cycle Days: approximately 64.04
+P90 Cycle Days: approximately 126.08
+High Priority Cases: 12,361
+High Priority Rate: approximately 4.91%
+PO Modification Rate: approximately 12.58%
+Invoice Reversal Rate: approximately 2.56%
+GR Reversal Rate: approximately 0.98%
+Payment Block Handling Rate: approximately 22.22%
+Process Variants: approximately 11,973
+
+Before designing the dashboard, confirm Power BI reproduces these values.
+
+------------------------------------------------------------
+ANALYTICAL BOUNDARIES
+------------------------------------------------------------
+Do not present:
+Exception = Fraud
+Rare Variant = Non-compliance
+Repeated Activity = Confirmed Rework
+High Vendor Exception Rate = Poor Supplier
+Association = Causation
+
+Investigation Priority is an operational review aid only.
